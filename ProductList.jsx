@@ -1,122 +1,149 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addItem } from "../redux/CartSlice";
+import "./ProductList.css";
 
-const plants = [
+const products = [
   {
     id: 1,
     name: "Snake Plant",
-    category: "Indoor Plants",
-    price: 499,
-    image: "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?w=400",
+    category: "Indoor",
+    price: 15,
+    image: "https://images.unsplash.com/photo-1463320726281-696a485928c7",
   },
   {
     id: 2,
     name: "Peace Lily",
-    category: "Indoor Plants",
-    price: 599,
-    image: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=400",
+    category: "Indoor",
+    price: 20,
+    image: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6",
   },
   {
     id: 3,
     name: "Aloe Vera",
-    category: "Medicinal Plants",
-    price: 299,
-    image: "https://images.unsplash.com/photo-1512428813834-c702c7702b78?w=400",
+    category: "Medicinal",
+    price: 18,
+    image: "https://images.unsplash.com/photo-1459156212016-c812468e2115",
   },
   {
     id: 4,
-    name: "Tulsi",
-    category: "Medicinal Plants",
-    price: 199,
-    image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400",
+    name: "Rose Plant",
+    category: "Flowering",
+    price: 22,
+    image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946",
   },
   {
     id: 5,
-    name: "Rose",
-    category: "Flowering Plants",
-    price: 399,
-    image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400",
+    name: "Bonsai",
+    category: "Bonsai",
+    price: 45,
+    image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735",
   },
   {
     id: 6,
-    name: "Jasmine",
-    category: "Flowering Plants",
-    price: 349,
-    image: "https://images.unsplash.com/photo-1468327768560-75b778cbb551?w=400",
+    name: "Cactus",
+    category: "Succulent",
+    price: 12,
+    image: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42",
   },
 ];
 
 function ProductList() {
   const dispatch = useDispatch();
 
-  const categories = [...new Set(plants.map((plant) => plant.category))];
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [addedItems, setAddedItems] = useState([]);
+
+  const filteredProducts = products.filter((item) => {
+    const categoryMatch =
+      category === "All" || item.category === category;
+
+    const searchMatch = item.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    return categoryMatch && searchMatch;
+  });
+
+  const handleAddToCart = (item) => {
+    dispatch(addItem(item));
+
+    if (!addedItems.includes(item.id)) {
+      setAddedItems([...addedItems, item.id]);
+    }
+  };
 
   return (
-    <div style={{ padding: "30px", background: "#f5f5f5" }}>
-      <h1 style={{ textAlign: "center", color: "#2E7D32" }}>
-        🌿 Paradise Nursery
-      </h1>
+    <div className="product-page">
 
-      {categories.map((category) => (
-        <div key={category} style={{ marginBottom: "40px" }}>
-          <h2>{category}</h2>
+      <h1>🌿 Paradise Nursery</h1>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "20px",
-            }}
-          >
-            {plants
-              .filter((plant) => plant.category === category)
-              .map((plant) => (
-                <div
-                  key={plant.id}
-                  style={{
-                    background: "#fff",
-                    padding: "15px",
-                    borderRadius: "10px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    textAlign: "center",
-                  }}
-                >
-                  <img
-                    src={plant.image}
-                    alt={plant.name}
-                    style={{
-                      width: "100%",
-                      height: "200px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                    }}
-                  />
+      <p>
+        Browse our premium collection of indoor, outdoor,
+        flowering and medicinal plants.
+      </p>
 
-                  <h3>{plant.name}</h3>
+      <div className="toolbar">
 
-                  <p>
-                    <strong>₹{plant.price}</strong>
-                  </p>
+        <input
+          type="text"
+          placeholder="Search plants..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-                  <button
-                    onClick={() => dispatch(addItem(plant))}
-                    style={{
-                      background: "#2E7D32",
-                      color: "#fff",
-                      border: "none",
-                      padding: "10px 20px",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option>All</option>
+          <option>Indoor</option>
+          <option>Flowering</option>
+          <option>Medicinal</option>
+          <option>Bonsai</option>
+          <option>Succulent</option>
+        </select>
+
+      </div>
+
+      <div className="product-grid">
+
+        {filteredProducts.map((plant) => (
+
+          <div className="product-card" key={plant.id}>
+
+            <img
+              src={plant.image}
+              alt={plant.name}
+            />
+
+            <h2>{plant.name}</h2>
+
+            <h4>{plant.category}</h4>
+
+            <p>
+              Healthy premium quality plant for your home
+              and office decoration.
+            </p>
+
+            <h3>${plant.price}</h3>
+
+            <button
+              disabled={addedItems.includes(plant.id)}
+              onClick={() => handleAddToCart(plant)}
+            >
+              {addedItems.includes(plant.id)
+                ? "Added ✓"
+                : "Add to Cart"}
+            </button>
+
           </div>
-        </div>
-      ))}
+
+        ))}
+
+      </div>
+
     </div>
   );
 }
