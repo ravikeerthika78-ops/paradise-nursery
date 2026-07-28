@@ -1,105 +1,91 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  addItem,
   removeItem,
   updateQuantity,
+  clearCart,
 } from "../redux/CartSlice";
+import { Link } from "react-router-dom";
+import "./CartItem.css";
 
 function CartItem() {
   const dispatch = useDispatch();
 
-  const cartItems = useSelector((state) => state.cart.items);
-
-  const totalAmount = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
+  const { cartItems, totalAmount, totalQuantity } = useSelector(
+    (state) => state.cart
   );
 
   const increaseQuantity = (item) => {
-    dispatch(
-      updateQuantity({
-        id: item.id,
-        quantity: item.quantity + 1,
-      })
-    );
+    dispatch(addItem(item));
   };
 
   const decreaseQuantity = (item) => {
-    if (item.quantity > 1) {
-      dispatch(
-        updateQuantity({
-          id: item.id,
-          quantity: item.quantity - 1,
-        })
-      );
-    } else {
-      dispatch(removeItem(item.id));
-    }
+    dispatch(removeItem(item.id));
   };
 
-  return (
-    <div
-      style={{
-        padding: "30px",
-        backgroundColor: "#f5f5f5",
-        minHeight: "100vh",
-      }}
-    >
-      <h1 style={{ textAlign: "center", color: "#2E7D32" }}>
-        🛒 Shopping Cart
-      </h1>
+  const removeProduct = (item) => {
+    dispatch(updateQuantity({ id: item.id, quantity: 0 }));
+  };
 
-      {cartItems.length === 0 ? (
-        <h2 style={{ textAlign: "center" }}>
-          Your cart is empty.
-        </h2>
-      ) : (
-        <>
+  if (cartItems.length === 0) {
+    return (
+      <div className="empty-cart">
+        <h1>🛒 Your Shopping Cart</h1>
+
+        <h2>Your cart is empty.</h2>
+
+        <p>
+          Browse our beautiful collection of plants and add your
+          favorites to the cart.
+        </p>
+
+        <Link to="/products">
+          <button className="shop-btn">
+            Continue Shopping
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cart-page">
+
+      <h1>🌿 Paradise Nursery Shopping Cart</h1>
+
+      <div className="cart-container">
+
+        <div className="cart-items">
+
           {cartItems.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                background: "#fff",
-                padding: "20px",
-                margin: "20px 0",
-                borderRadius: "10px",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-              }}
-            >
+
+            <div className="cart-card" key={item.id}>
+
               <img
                 src={item.image}
                 alt={item.name}
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  objectFit: "cover",
-                  borderRadius: "8px",
-                }}
               />
 
-              <div style={{ flex: 1, marginLeft: "20px" }}>
+              <div className="cart-details">
+
                 <h2>{item.name}</h2>
 
                 <p>
-                  <strong>Price:</strong> ₹{item.price}
+                  <strong>Category:</strong> {item.category}
                 </p>
 
                 <p>
-                  <strong>Subtotal:</strong> ₹
-                  {item.price * item.quantity}
+                  <strong>Price:</strong> ${item.price}
                 </p>
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    marginTop: "10px",
-                  }}
-                >
+                <p>
+                  <strong>Total:</strong> $
+                  {(item.price * item.quantity).toFixed(2)}
+                </p>
+
+                <div className="quantity-box">
+
                   <button
                     onClick={() => decreaseQuantity(item)}
                   >
@@ -113,65 +99,81 @@ function CartItem() {
                   >
                     +
                   </button>
+
                 </div>
+
+                <button
+                  className="remove-btn"
+                  onClick={() => removeProduct(item)}
+                >
+                  Remove Item
+                </button>
+
               </div>
 
-              <button
-                onClick={() => dispatch(removeItem(item.id))}
-                style={{
-                  background: "red",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                Remove
-              </button>
             </div>
+
           ))}
 
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: "30px",
-            }}
-          >
-            <h2>Total: ₹{totalAmount}</h2>
+        </div>
 
-            <button
-              style={{
-                margin: "10px",
-                padding: "12px 25px",
-                background: "#2E7D32",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-              onClick={() => window.history.back()}
-            >
+        <div className="cart-summary">
+
+          <h2>Order Summary</h2>
+
+          <hr />
+
+          <div className="summary-row">
+            <span>Total Items</span>
+            <span>{totalQuantity}</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Subtotal</span>
+            <span>${totalAmount.toFixed(2)}</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Shipping</span>
+            <span>FREE</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Tax</span>
+            <span>$0.00</span>
+          </div>
+
+          <hr />
+
+          <div className="summary-total">
+            <strong>Total</strong>
+            <strong>${totalAmount.toFixed(2)}</strong>
+          </div>
+
+          <button
+            className="checkout-btn"
+            onClick={() => alert("Proceeding to Checkout...")}
+          >
+            Proceed to Checkout
+          </button>
+
+          <button
+            className="clear-btn"
+            onClick={() => dispatch(clearCart())}
+          >
+            Clear Cart
+          </button>
+
+          <Link to="/products">
+            <button className="continue-btn">
               Continue Shopping
             </button>
+          </Link>
 
-            <button
-              style={{
-                margin: "10px",
-                padding: "12px 25px",
-                background: "#1565C0",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-              onClick={() => alert("Checkout Successful!")}
-            >
-              Checkout
-            </button>
-          </div>
-        </>
-      )}
+        </div>
+
+      </div>
+
     </div>
   );
 }
